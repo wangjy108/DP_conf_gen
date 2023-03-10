@@ -3,7 +3,7 @@
 
 sdf_tag=${1}
 tool_file=/home/jywang/tool_file/DP_conf_gen/denovo_gen_workflow
-LBG_UTIL=/home/jywang/tool_file/lbg_util
+LBG_UTIL=/home/jywang/tool_file/lbg_util/g16
 
 ## STEP1 prepare and run auto3D
 #conda init
