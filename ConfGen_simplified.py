@@ -7,6 +7,9 @@
 //Calculate overall rmsd based on aligned atomic distance and punish atomic pair far in periodic table
 //Select top conformer for each generated mol based on rmsd
 
+// author: WangJiayue 
+// email address: wangjy108@outlook.com
+
 """
 
 from rdkit import rdBase, Chem
