@@ -1,0 +1,13 @@
+{
+    "job_name": "auto3Dgen",
+    "command": "python auto3D.py parameters.yaml",
+    "log_file": "tmp_log",
+    "backward_files": [],
+    "program_id": "",
+    "platform": "ali",
+    "job_group_id": "",
+    "disk_size": 256,
+    "machine_type": "c8_m32_1 * NVIDIA V100",
+    "job_type": "container",
+    "image_name": "registry.dp.tech/dptech/prod-1364/auto3d:run0.1"
+}
