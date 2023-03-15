@@ -2,14 +2,8 @@
 # coding: utf-8
 
 """
-//Gen 3D conformer from input smiles file (single column, no header)
-//Align generated conformation with rdkit crippen3D method
-//Calculate overall rmsd based on aligned atomic distance and punish atomic pair far in periodic table
-//Select top conformer for each generated mol based on rmsd
-
-// author: WangJiayue 
-// email address: wangjy108@outlook.com
-
+// author: Wang (Max) Jiayue 
+// email: wangjy108@outlook.com
 """
 
 from rdkit import rdBase, Chem
@@ -21,7 +15,7 @@ import numpy as np
 import os
 import argparse
 import copy
-import scipy
+import scipy.spatial
 
 def rmsd_self_whole(rdmolobj_mol, rdmolobj_ref):
     mol_xyz = rdmolobj_mol.GetConformer().GetPositions()
@@ -287,7 +281,14 @@ def run(InputSmiFile:str, Ref3DFile:str, ConfGenNum:int, SaveConfNumEach:int):
         return 
     
     ## get smiles info
-    searchMolSmi = pd.read_csv(InputSmiFile, header=None, sep="\\s+").iloc[:,0].to_list()
+    get_df = pd.read_csv(InputSmiFile, header=None, sep="\\s+")
+    searchMolSmi = get_df.iloc[:,0].to_list()
+    nameTag = get_df.iloc[:,-1].to_list()
+
+    pariwise_smile_name = {}
+
+    for ii in range(len(searchMolSmi)):
+        pariwise_smile_name.setdefault(searchMolSmi[ii], nameTag[ii])
     
     ## gen conf from smiles
     ## default method: MMFF94, default mataching property: _cSMILES
@@ -297,9 +298,21 @@ def run(InputSmiFile:str, Ref3DFile:str, ConfGenNum:int, SaveConfNumEach:int):
     ## align, ranking and save
     save_by_cluster(molsdf_set="SAVE.sdf", ref_single = refMolObj, n_cluster = SaveConfNumEach, proTag='cSMILES')
     ## all available 3D conformations (1 for each simle) are saved in FILTERED_SAVE.sdf
+
+    ## extrac setting:
+    before_finale = [mm for mm in Chem.SDMolSupplier("FILTER_SAVE.sdf", removeHs=False)]
+
+    finale = Chem.SDWriter("FINALE.sdf")
+    for each in before_finale:
+        getSMI = each.GetProp("cSMILES")
+        _name = pariwise_smile_name[getSMI]
+        each.SetProp("_Name", _name)
+        finale.write(each)
+    finale.close()
+
+    os.system("rm -f SAVE.sdf FILTER_SAVE.sdf")
+    print("FINALE.sdf save 3D conformation information")
     
-    print("FILTER_SAVE.sdf save 3D conformation information")
-    os.system("rm -f SAVE.sdf")
     
     if len(LeftSmi) != 0:
         df = pd.DataFrame({"":LeftSmi})
