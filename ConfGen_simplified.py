@@ -306,7 +306,7 @@ def run(InputSmiFile:str, Ref3DFile:str, ConfGenNum:int, SaveConfNumEach:int):
     for each in before_finale:
         getSMI = each.GetProp("cSMILES")
         _name = pariwise_smile_name[getSMI]
-        each.SetProp("_Name", _name)
+        each.SetProp("_Name", str(_name))
         finale.write(each)
     finale.close()
 
