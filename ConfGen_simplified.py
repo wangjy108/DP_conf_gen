@@ -300,7 +300,7 @@ def run(InputSmiFile:str, Ref3DFile:str, ConfGenNum:int, SaveConfNumEach:int):
     ## all available 3D conformations (1 for each simle) are saved in FILTERED_SAVE.sdf
 
     ## extrac setting:
-    before_finale = [mm for mm in Chem.SDMolSupplier("FILTER_SAVE.sdf", removeHs=False)]
+    before_finale = [mm for mm in Chem.SDMolSupplier("FILTERED_SAVE.sdf", removeHs=False)]
 
     finale = Chem.SDWriter("FINALE.sdf")
     for each in before_finale:
@@ -310,7 +310,7 @@ def run(InputSmiFile:str, Ref3DFile:str, ConfGenNum:int, SaveConfNumEach:int):
         finale.write(each)
     finale.close()
 
-    os.system("rm -f SAVE.sdf FILTER_SAVE.sdf")
+    os.system("rm -f SAVE.sdf FILTERED_SAVE.sdf")
     print("FINALE.sdf save 3D conformation information")
     
     
