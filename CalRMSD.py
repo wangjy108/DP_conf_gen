@@ -76,14 +76,14 @@ class RMSD():
         return rmsd
     
     def calc_RMSD(self):
-        run_dict = {"crippen3D": rmsd_rdkit_crippen3D(self.SearchMolObj, self.RefMolObj), \
-                    "selfWhole": rmsd_self_whole(self.SearchMolObj, self.RefMolObj)}
+        run_dict = {"crippen3D": rmsd_rdkit_crippen3D, \
+                    "selfWhole": rmsd_self_whole}
         try:
             run_dict[self.method]
         except Exception as e:
             print(f"Wrong method setting, please choose from [{[kk for kk in run_dict.keys()]}]")
             return None
         
-        get_rmsd = run_dict[self.method]
+        get_rmsd = run_dict[self.method](self.SearchMolObj, self.RefMolObj)
 
         return get_rmsd

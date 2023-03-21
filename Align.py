@@ -73,15 +73,15 @@ class Align():
         return 
     
     def doAlign(self):
-        run_dict = {"crippen3D": align_by_3Dcrippen(self.SearchMolObj, self.RefMolObj), \
-                    "LSalignFlex": align_by_LSalignFlex(self.SearchMolObj, self.RefMolObj)}
+        run_dict = {"crippen3D": align_by_3Dcrippen, \
+                    "LSalignFlex": align_by_LSalignFlex}
         try:
             run_dict[self.method]
         except Exception as e:
             print(f"Wrong method setting, please choose from [{[kk for kk in run_dict.keys()]}]")
             return None
         
-        get_aligned_mol = run_dict[self.method]
+        get_aligned_mol = run_dict[self.method](self.SearchMolObj, self.RefMolObj)
 
         return get_aligned_mol
 
