@@ -61,10 +61,10 @@ class Align():
 
         try:
                 aligned_rdmolobj_search.SetProp("_Name", f"Aligned_mol")
-            except Exception as e:
-                rigid_align = align_by_3Dcrippen(mol_search, ref)
-                rigid_align.SetProp("_Name", f"Aligned_mol_rig")
-                aligned_rdmolobj_search = rigid_align
+        except Exception as e:
+            rigid_align = align_by_3Dcrippen(mol_search, ref)
+            rigid_align.SetProp("_Name", f"Aligned_mol_rig")
+            aligned_rdmolobj_search = rigid_align
             
         os.system(f"rm -f Aligned_* TEMP_*")
         return aligned_rdmolobj_search
