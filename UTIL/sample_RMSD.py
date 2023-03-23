@@ -23,7 +23,7 @@ def main():
                         help='input reference sdf file N == 1')
     parser.add_argument('--saveValue', type=bool, default=False, 
                         help="if save calculated rmsd in file, default is ALIGNED.sdf")
-    parser.add_argument('--rmsd_method', type=str, default="crippen3D", 
+    parser.add_argument('--rmsd_method', type=str, default="selfWhole", 
                         help="rmsd method, default is selfWhole, could be \
                         [crippen3D, selfWhole]")
     args = parser.parse_args()
