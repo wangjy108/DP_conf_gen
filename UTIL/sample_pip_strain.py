@@ -79,11 +79,6 @@ def main(input_sdf:str):
 
 
 if __name__ == '__main__':
-    df = pd.DataFrame({"Name": [cc.split(".")[0] for cc in sdf], \
-                       "docking score": ds, \
-                       "strain energy (kcal/mol)": strain})
-    df.to_csv("result.csv", index=None)
-
     parser = argparse.ArgumentParser(description='sample naive strain energy workflow, \
                                     $WORKDIR has same name with input sdf, \
                                     save energy labeled sdf in [**_withEneTag.sdf], \
