@@ -14,13 +14,8 @@ python setup.py install    # run
 
 ```
 
-**Docker**
+download case sample and use them
 ```bash
-docker pull registry.dp.tech/dptech/prod-1364/strain:run0.0.2
-docker run -dit -v ${PWD}:/data --name strain registry.dp.tech/dptech/prod-1364/strain:run0.0.2 /bin/bash  # set image
-docker attach strain
-cd /data
-# initiate config.in file
-python ${each}                                              # run
+python ${eachfile} --help
 
 ```
