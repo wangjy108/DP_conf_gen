@@ -113,7 +113,7 @@ class main():
         cc_opt.write(get_aligned_opt_pose)
         cc.close()
 
-        os.system(f"rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
+        os.system("rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
         logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
                     Tag name is [Energy_dft], unit is [kcal/mol]")
 
@@ -164,7 +164,7 @@ class main():
 
         os.system(f"mv _OPT.sdf stable_{_name}.sdf")
 
-        os.system(f"rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
+        os.system("rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
         logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
                     Tag name is [Energy_dft], unit is [kcal/mol]")
 
