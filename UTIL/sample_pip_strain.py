@@ -108,10 +108,15 @@ class main():
             logging.info(f"Save strain energy in {os.getcwd()}/StrainEne_{_name}.csv")
 
         #os.system(f"mv _OPT.sdf stable_{_name}.sdf")
-        get_aligned_opt_pose = align(SearchMolObj=stable_mol, RefMolObj=input_mol[0], method="crippen3D").run()
+
+        ## should be update
+        _stable_mol = [mm for mm in Chem.SDMolSupplier("_OPT.sdf", removeHs=False) if mm][0]
+        _ref_mol = [mm for mm in Chem.SDMolSupplier(self.db_name, removeHs=False) if mm][0]
+        get_aligned_opt_pose = align(SearchMolObj=_stable_mol, RefMolObj=_ref_mol, method="crippen3D").run()
         cc_opt = Chem.SDWriter(f"stable_{_name}.sdf")
         cc_opt.write(get_aligned_opt_pose)
         cc.close()
+
 
         os.system("rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
         logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
@@ -224,5 +229,5 @@ if __name__ == '__main__':
 
 
     
-
+##
 
