@@ -17,6 +17,7 @@ from util.Cluster import cluster
 from util.OptbySQM import System as sysopt
 from util.SPcalc import System as syssp
 from util.Align import Align as align
+from util.ConfRelaxbySQM import System as MDsample
 
 
 class main():
@@ -64,7 +65,15 @@ class main():
             write_smi.write(f"{this_smi}\n")
         
         ## run sampling
-        ConfGen(input_smi_file="_input.smi", method="MMFF94").run()
+        try:
+            ConfGen(input_smi_file="_input.smi", method="MMFF94").run()
+        except Exception as e:
+            logging.info("Initial MM conf gen failed, use MD sampling instead")
+            MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
+        
+        if (not os.path.isfile("SAVE.sdf")) or (not os.path.getsize("SAVE.sdf")):
+            logging.info("Initial MM conf gen failed, use MD sampling instead")
+            MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
 
         ## run align 
         cluster(inputSDF_fileName="SAVE.sdf", save_n=self.N_gen_conformer).run()
@@ -169,7 +178,7 @@ class main():
 
         os.system(f"mv _OPT.sdf stable_{_name}.sdf")
 
-        os.system("rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
+        os.system("rm -f *.smi SAVE.sdf FILTER.sdf _*.sdf")
         logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
                     Tag name is [Energy_dft], unit is [kcal/mol]")
 
