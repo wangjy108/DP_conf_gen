@@ -31,7 +31,7 @@ def run(prefix="StrainFinal"):
                         available.setdefault(each, (os.path.join(os.path.join(a, each), each_csv)))
                     if [ff for ff in cc if "sdf" in ff]:
                         should_have.append(each)
-    print(available)
+    #print(available)
     
 
     for _dir, _csv in available.items():
