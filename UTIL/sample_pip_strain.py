@@ -61,18 +61,21 @@ class main():
 
         _name = self.db_name.split(".")[0]
 
-        with open("_input.smi", "w+") as write_smi:
-            write_smi.write(f"{this_smi}\n")
-        
-        ## run sampling
-        try:
-            ConfGen(input_smi_file="_input.smi", method="MMFF94").run()
-        except Exception as e:
-            logging.info("Initial MM conf gen failed, use MD sampling instead")
-            MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
-        
-        if (not os.path.isfile("SAVE.sdf")) or (not os.path.getsize("SAVE.sdf")):
-            logging.info("Initial MM conf gen failed, use MD sampling instead")
+        if not self.method == "sample":
+            with open("_input.smi", "w+") as write_smi:
+                write_smi.write(f"{this_smi}\n")
+            ## run sampling
+            try:
+                ConfGen(input_smi_file="_input.smi", method="MMFF94").run()
+            except Exception as e:
+                logging.info("Initial MM conf gen failed, use MD sampling instead")
+                MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
+            
+            if (not os.path.isfile("SAVE.sdf")) or (not os.path.getsize("SAVE.sdf")):
+                logging.info("Initial MM conf gen failed, use MD sampling instead")
+                MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
+        else:
+            logging.info("use MD relax for sampling")
             MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
 
         ## run align 
@@ -125,7 +128,6 @@ class main():
         cc_opt = Chem.SDWriter(f"stable_{_name}.sdf")
         cc_opt.write(get_aligned_opt_pose)
         cc.close()
-
 
         os.system("rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
         logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
@@ -199,7 +201,8 @@ class main():
         os.system(f"mv ../{self.db_name} ./")
 
         run_dict = {"denovo": self.pip_denovo, \
-                    "local": self.pip_local}
+                    "local": self.pip_local, \
+                    "sample": self.pip_denovo}
         try:
             run_dict[self.method]
         except Exception as e:
@@ -220,7 +223,7 @@ if __name__ == '__main__':
     parser.add_argument('--input_sdf', type=str, required=True, 
                         help='input sdf file, docking pose(s) for single mol')
     parser.add_argument('--method', type=str, default='denovo',
-                        help='strain method, available from ["denovo","local"], \
+                        help='strain method, available from ["denovo","local","sample"], \
                         default [denovo]')
     parser.add_argument('--N_gen_conformer', type=int, default=50, 
                         help='available for [denovo] mode, define N conformers in sampling stage, \
