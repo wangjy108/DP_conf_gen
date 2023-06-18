@@ -188,7 +188,7 @@ class main():
     
     def run(self):
         try:
-            _name = self.db_name.split(".")[0]
+            _name = ".".join(self.db_name.split(".")[:-1])
         except Exception as e:
             logging.info("Bad input sdf, check and run again")
             return
