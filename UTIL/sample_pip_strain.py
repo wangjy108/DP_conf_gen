@@ -33,14 +33,6 @@ class main():
             self.method = 'denovo'
         
         try:
-            self.if_csv = args["if_csv"]
-        except Exception as e:
-            self.if_csv = True
-        else:
-            if not isinstance(self.if_csv, bool):
-                self.if_csv = True
-        
-        try:
             self.N_gen_conformer = args["N_gen_conformer"]
         except Exception as e:
             self.N_gen_conformer = 50
@@ -49,6 +41,10 @@ class main():
                 self.N_gen_conformer = int(self.N_gen_conformer)
             except Exception as e:
                 self.N_gen_conformer = 50
+        
+        self.HA_constrain = args["use_constrain"]
+        self.if_csv = args["if_csv"]
+
 
     def pip_denovo(self):
         ## get_smi
@@ -83,7 +79,7 @@ class main():
 
         ## run xtb opt
         logging.info("Start geom optimization")
-        _ = sysopt(input_sdf="FILTER.sdf").run_process()
+        _ = sysopt(input_sdf="FILTER.sdf", HA_constrain=self.HA_constrain).run_process()
 
         ## run final SP
         logging.info("Start Single point energy calc")
@@ -228,14 +224,17 @@ if __name__ == '__main__':
     parser.add_argument('--N_gen_conformer', type=int, default=50, 
                         help='available for [denovo] mode, define N conformers in sampling stage, \
                         default 50')
-    parser.add_argument('--if_csv', type=bool, default=True, 
-                        help="if save csv to record calc result")
+    parser.add_argument('--not_save_csv', default=True, action='store_false', \
+                        help="adding this option will not save final result in csv file")
+    parser.add_argument('--no_constrain', default=True, action='store_false', \
+                        help="adding this option will turnoff constrain on heavy atoms when performing geometry optimization")
     args = parser.parse_args()
 
     main(input_sdf=args.input_sdf, \
          method=args.method, \
          N_gen_conformer=args.N_gen_conformer, \
-         if_csv=args.if_csv).run()
+         if_csv=args.not_save_csv,\
+         use_constrain=args.no_constrain).run()
 
 
 
