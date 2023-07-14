@@ -62,8 +62,8 @@ class main():
 
         ## perform initial_opt by SQM
         if db_name:
-            _prefix_folder = ".".join(db_name.split(".")[:-1])
-            work_dir = os.path.join(self.main_dir, f"{_prefix_folder}")
+            self.prefix = ".".join(db_name.split(".")[:-1])
+            work_dir = os.path.join(self.main_dir, f"{self.prefix}")
             if not os.path.exists(work_dir):
                 os.mkdir(work_dir)
             os.chdir(work_dir)
@@ -72,8 +72,8 @@ class main():
             _ = sysopt(input_sdf=db_name, HA_constrain=True).run_process()
             ## rename _OPT.sdf for other run 
             if os.path.isfile("_OPT.sdf"):
-                _prefix = db_name.split(".")[0]
-                self.db_name = f"{_prefix}.initial_opt.sdf"
+                #_prefix = db_name.split(".")[0]
+                self.db_name = f"{self.prefix}.initial_opt.sdf"
                 os.system(f"mv _OPT.sdf {self.db_name}")
             else:
                 self.db_name = None
@@ -91,7 +91,7 @@ class main():
             logging.info("check and run again")
             return 
         logging.info("Run strain calc in de-novo gen mode")
-
+        
         if not self.method == "sample":
             with open("_input.smi", "w+") as write_smi:
                 write_smi.write(f"{this_smi}\n")
@@ -130,7 +130,7 @@ class main():
         track_energy = []
         track_mol_label = []
 
-        cc = Chem.SDWriter(os.path.join(os.getcwd(), f"{_name}_withEneTag.sdf"))
+        cc = Chem.SDWriter(os.path.join(os.getcwd(), f"{self.prefix}_withEneTag.sdf"))
         for each in sorted_input_pose:
             get_energy = float(each[0])
             diff = abs(stable_energy - get_energy) * 627.51
@@ -139,7 +139,7 @@ class main():
             this_mol.SetProp("Energy_dft", f"{diff:.3f}")
 
             track_energy.append(f"{diff:.3f}")
-            track_mol_label.append(f"{_name}_{get_idx}")
+            track_mol_label.append(f"{self.prefix}_{get_idx}")
 
             cc.write(this_mol)
         cc.close()
@@ -147,8 +147,8 @@ class main():
         if self.if_csv:
             df = pd.DataFrame({"mol_label":track_mol_label, \
                             "Strain_ene(kcal/mol)": track_energy})
-            df.to_csv(f"StrainEne_{_name}.csv", index=None)
-            logging.info(f"Save strain energy in {os.getcwd()}/StrainEne_{_name}.csv")
+            df.to_csv(f"StrainEne_{self.prefix}.csv", index=None)
+            logging.info(f"Save strain energy in {os.getcwd()}/StrainEne_{self.prefix}.csv")
 
         #os.system(f"mv _OPT.sdf stable_{_name}.sdf")
 
@@ -156,12 +156,12 @@ class main():
         _stable_mol = [mm for mm in Chem.SDMolSupplier("_OPT.sdf", removeHs=False) if mm][0]
         _ref_mol = [mm for mm in Chem.SDMolSupplier(self.db_name, removeHs=False) if mm][0]
         get_aligned_opt_pose = align(SearchMolObj=_stable_mol, RefMolObj=_ref_mol, method="crippen3D").run()
-        cc_opt = Chem.SDWriter(f"stable_{_name}.sdf")
+        cc_opt = Chem.SDWriter(f"stable_{self.prefix}.sdf")
         cc_opt.write(get_aligned_opt_pose)
         cc.close()
 
         os.system("rm -f _input.smi SAVE.sdf FILTER.sdf _OPT.sdf")
-        logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
+        logging.info(f"Strain energy for input is labeled in {self.prefix}_withEneTag.sdf \
                     Tag name is [Energy_dft], unit is [kcal/mol]")
 
         return
@@ -187,7 +187,7 @@ class main():
         track_energy = []
         track_mol_label = []
 
-        cc = Chem.SDWriter(os.path.join(os.getcwd(), f"{_name}_withEneTag.sdf"))
+        cc = Chem.SDWriter(os.path.join(os.getcwd(), f"{self.prefix}_withEneTag.sdf"))
         for each in sorted_input_pose:
             get_energy = float(each[0])
             diff = abs(stable_energy - get_energy) * 627.51
@@ -196,7 +196,7 @@ class main():
             this_mol.SetProp("Energy_dft", f"{diff:.3f}")
 
             track_energy.append(f"{diff:.3f}")
-            track_mol_label.append(f"{_name}_{get_idx}")
+            track_mol_label.append(f"{self.prefix}_{get_idx}")
 
             cc.write(this_mol)
         cc.close()
@@ -204,18 +204,22 @@ class main():
         if self.if_csv:
             df = pd.DataFrame({"mol_label":track_mol_label, \
                             "Strain_ene(kcal/mol)": track_energy})
-            df.to_csv(f"StrainEne_{_name}.csv", index=None)
-            logging.info(f"Save strain energy in {os.getcwd()}/StrainEne_{_name}.csv")
+            df.to_csv(f"StrainEne_{self.prefix}.csv", index=None)
+            logging.info(f"Save strain energy in {os.getcwd()}/StrainEne_{self.prefix}.csv")
 
-        os.system(f"mv _OPT.sdf stable_{_name}.sdf")
+        os.system(f"mv _OPT.sdf stable_{self.prefix}.sdf")
 
         os.system("rm -f *.smi SAVE.sdf FILTER.sdf _*.sdf")
-        logging.info(f"Strain energy for input is labeled in {_name}_withEneTag.sdf \
+        logging.info(f"Strain energy for input is labeled in {self.prefix}_withEneTag.sdf \
                     Tag name is [Energy_dft], unit is [kcal/mol]")
 
         return
     
     def run(self):
+        if not self.db_name:
+            logging.info("check and run again")
+            return 
+        
         run_dict = {"denovo": self.pip_denovo, \
                     "local": self.pip_local, \
                     "sample": self.pip_denovo}
