@@ -9,6 +9,7 @@
 import argparse
 import logging
 from rdkit import Chem
+from rdkit.Chem import rdMolDescriptors
 import os
 import sys
 import pandas as pd
@@ -23,39 +24,73 @@ from util.ConfRelaxbySQM import System as MDsample
 class main():
     def __init__(self, **args):
         try:
-            self.db_name = args["input_sdf"]
+            db_name = args["input_sdf"]
         except Exception as e:
-            self.db_name = None
+            db_name = None
+        
+        self.main_dir = os.getcwd()
+        
+        ## initial
+        _dic_rotableBond = {0: 100, 1: 300}
+        try:
+            self.get_mol = [mm for mm in Chem.SDMolSupplier(db_name) if mm][0]
+        except Exception as e:
+            self.get_mol = None
+        else:
+            rotable_bond = rdMolDescriptors.CalcNumRotatableBonds(self.get_mol)
+            _def_func = lambda x: 0 if max(5, x) == 5 else 1
 
         try:
             self.method = args["method"]
         except Exception as e:
-            self.method = 'denovo'
+            self.method = 'sample'
         
         try:
             self.N_gen_conformer = args["N_gen_conformer"]
         except Exception as e:
-            self.N_gen_conformer = 50
+            self.N_gen_conformer = _dic_rotableBond[_def_func(rotable_bond)]    
         else:
             try:
                 self.N_gen_conformer = int(self.N_gen_conformer)
             except Exception as e:
-                self.N_gen_conformer = 50
+                self.N_gen_conformer = _dic_rotableBond[_def_func(rotable_bond)]
+        
+        #print(f"gen conformer: {self.N_gen_conformer}")
         
         self.HA_constrain = args["use_constrain"]
         self.if_csv = args["if_csv"]
 
+        ## perform initial_opt by SQM
+        if db_name:
+            _prefix_folder = ".".join(db_name.split(".")[:-1])
+            work_dir = os.path.join(self.main_dir, f"{_prefix_folder}")
+            if not os.path.exists(work_dir):
+                os.mkdir(work_dir)
+            os.chdir(work_dir)
+            os.system(f"mv {self.main_dir}/{db_name} ./")
+
+            _ = sysopt(input_sdf=db_name, HA_constrain=True).run_process()
+            ## rename _OPT.sdf for other run 
+            if os.path.isfile("_OPT.sdf"):
+                _prefix = db_name.split(".")[0]
+                self.db_name = f"{_prefix}.initial_opt.sdf"
+                os.system(f"mv _OPT.sdf {self.db_name}")
+            else:
+                self.db_name = None
+                logging.info("Failed at initial optimization for input")
+        else:
+            self.db_name = None
+            logging.info("Bad input sdf file")
+            
 
     def pip_denovo(self):
         ## get_smi
         try:
-            this_smi = Chem.MolToSmiles([mm for mm in Chem.SDMolSupplier(self.db_name) if mm][0])
+            this_smi = Chem.MolToSmiles(self.get_mol)
         except Exception as e:
-            logging.info("Bad input sdf, check and run again")
+            logging.info("check and run again")
             return 
-        logging.info("Run strain calc in de-novo mode")
-
-        _name = self.db_name.split(".")[0]
+        logging.info("Run strain calc in de-novo gen mode")
 
         if not self.method == "sample":
             with open("_input.smi", "w+") as write_smi:
@@ -136,9 +171,7 @@ class main():
         logging.info("Run strain calc in local mode")
 
         logging.info("Start geom optimization")
-        _ = sysopt(input_sdf=self.db_name).run_process()
-
-        _name = self.db_name.split(".")[0]
+        _ = sysopt(input_sdf=self.db_name, HA_constrain=self.HA_constrain).run_process()
 
         ## run final SP
         logging.info("Start Single point energy calc")
@@ -183,19 +216,6 @@ class main():
         return
     
     def run(self):
-        try:
-            _name = ".".join(self.db_name.split(".")[:-1])
-        except Exception as e:
-            logging.info("Bad input sdf, check and run again")
-            return
-        
-        main_dir = os.getcwd()
-        work_dir = os.path.join(main_dir, f"{_name}")
-        if not os.path.exists(work_dir):
-            os.mkdir(work_dir)
-        os.chdir(work_dir)
-        os.system(f"mv ../{self.db_name} ./")
-
         run_dict = {"denovo": self.pip_denovo, \
                     "local": self.pip_local, \
                     "sample": self.pip_denovo}
@@ -206,8 +226,8 @@ class main():
             return None
         
         run_dict[self.method]()
-        os.chdir(main_dir)
-
+        os.chdir(self.main_dir)
+        
         return 
 
 
@@ -218,12 +238,12 @@ if __name__ == '__main__':
                                     and stable pose in [opt_***.sdf]')
     parser.add_argument('--input_sdf', type=str, required=True, 
                         help='input sdf file, docking pose(s) for single mol')
-    parser.add_argument('--method', type=str, default='denovo',
+    parser.add_argument('--method', type=str, default="sample",
                         help='strain method, available from ["denovo","local","sample"], \
-                        default [denovo]')
-    parser.add_argument('--N_gen_conformer', type=int, default=50, 
-                        help='available for [denovo] mode, define N conformers in sampling stage, \
-                        default 50')
+                        default [sample]')
+    parser.add_argument('--N_gen_conformer', type=int, 
+                        help='available for [denovo and sample] mode, define N conformers in sampling stage, \
+                        if not defined, 100 if rotable bond <=5, else 300')
     parser.add_argument('--not_save_csv', default=True, action='store_false', \
                         help="adding this option will not save final result in csv file")
     parser.add_argument('--no_constrain', default=True, action='store_false', \
