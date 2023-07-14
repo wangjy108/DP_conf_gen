@@ -171,7 +171,7 @@ class main():
         logging.info("Run strain calc in local mode")
 
         logging.info("Start geom optimization")
-        _ = sysopt(input_sdf=self.db_name, HA_constrain=self.HA_constrain).run_process()
+        _ = sysopt(input_sdf=self.db_name, HA_constrain=False).run_process()
 
         ## run final SP
         logging.info("Start Single point energy calc")
