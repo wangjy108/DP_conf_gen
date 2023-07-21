@@ -268,8 +268,6 @@ if __name__ == '__main__':
                         help="adding this option will turnoff constrain on heavy atoms when performing geometry optimization")
     args = parser.parse_args()
 
-    print(type(args.define_charge))
-
     main(input_sdf=args.input_sdf, \
          method=args.method, \
          N_gen_conformer=args.N_gen_conformer, \
