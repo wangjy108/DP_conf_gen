@@ -55,6 +55,13 @@ class main():
             except Exception as e:
                 self.N_gen_conformer = _dic_rotableBond[_def_func(rotable_bond)]
         
+        try:
+            self.charge = args["define_charge"]
+        except Exception as e:
+            self.charge = None
+        
+
+        
         #print(f"gen conformer: {self.N_gen_conformer}")
         
         self.HA_constrain = args["use_constrain"]
@@ -69,18 +76,23 @@ class main():
             os.chdir(work_dir)
             os.system(f"mv {self.main_dir}/{db_name} ./")
 
-            _ = sysopt(input_sdf=db_name, HA_constrain=True).run_process()
+            _, read_charge = sysopt(input_sdf=db_name, HA_constrain=True).run_process()
             ## rename _OPT.sdf for other run 
             if os.path.isfile("_OPT.sdf"):
                 #_prefix = db_name.split(".")[0]
                 self.db_name = f"{self.prefix}.initial_opt.sdf"
                 os.system(f"mv _OPT.sdf {self.db_name}")
+                if not self.charge:
+                    self.charge = read_charge[0]
+                else:
+                    self.charge = int(self.charge)
             else:
                 self.db_name = None
                 logging.info("Failed at initial optimization for input")
         else:
             self.db_name = None
             logging.info("Bad input sdf file")
+        
             
 
     def pip_denovo(self):
@@ -100,11 +112,11 @@ class main():
                 ConfGen(input_smi_file="_input.smi", method="MMFF94").run()
             except Exception as e:
                 logging.info("Initial MM conf gen failed, use MD sampling instead")
-                MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
+                MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer, define_charge=self.charge).run()
             
             if (not os.path.isfile("SAVE.sdf")) or (not os.path.getsize("SAVE.sdf")):
                 logging.info("Initial MM conf gen failed, use MD sampling instead")
-                MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
+                MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer, define_charge=self.charge).run()
         else:
             logging.info("use MD relax for sampling")
             MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
@@ -114,12 +126,12 @@ class main():
 
         ## run xtb opt
         logging.info("Start geom optimization")
-        _ = sysopt(input_sdf="FILTER.sdf", HA_constrain=self.HA_constrain).run_process()
+        _, _ = sysopt(input_sdf="FILTER.sdf", HA_constrain=self.HA_constrain, define_charge=self.charge).run_process()
 
         ## run final SP
         logging.info("Start Single point energy calc")
 
-        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name).run_pyscf()
+        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge).run_pyscf()
         logging.info("Get input pose single point energy")
         stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="read").run_pyscf()
         logging.info("Get theoretical stable pose single point energy")
@@ -171,12 +183,12 @@ class main():
         logging.info("Run strain calc in local mode")
 
         logging.info("Start geom optimization")
-        _ = sysopt(input_sdf=self.db_name, HA_constrain=False).run_process()
+        _, _ = sysopt(input_sdf=self.db_name, HA_constrain=False, define_charge=self.charge).run_process()
 
         ## run final SP
         logging.info("Start Single point energy calc")
 
-        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name).run_pyscf()
+        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge).run_pyscf()
         logging.info("Get input pose single point energy")
         stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="read").run_pyscf()
         logging.info("Get theoretical stable pose single point energy")
@@ -248,11 +260,15 @@ if __name__ == '__main__':
     parser.add_argument('--N_gen_conformer', type=int, 
                         help='available for [denovo and sample] mode, define N conformers in sampling stage, \
                         if not defined, 100 if rotable bond <=5, else 300')
+    parser.add_argument('--define_charge', type=str, default=None,
+                        help='define charge for input, use you sense that rdkit may fail to get corret bond order, default None')
     parser.add_argument('--not_save_csv', default=True, action='store_false', \
                         help="adding this option will not save final result in csv file")
     parser.add_argument('--no_constrain', default=True, action='store_false', \
                         help="adding this option will turnoff constrain on heavy atoms when performing geometry optimization")
     args = parser.parse_args()
+
+    print(type(args.define_charge))
 
     main(input_sdf=args.input_sdf, \
          method=args.method, \
