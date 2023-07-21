@@ -16,7 +16,7 @@ def setup_lbg(projectID, _path):
         "disk_size": 128,
         "machine_type": "c16_m128_cpu",
         "job_type": "container",
-        "image_name": "registry.dp.tech/dptech/prod-1364/strain:run0.0.4"
+        "image_name": "registry.dp.tech/dptech/prod-1364/strain:run0.0.5"
     }
     
     file_name = os.path.join(_path, "input.json")
