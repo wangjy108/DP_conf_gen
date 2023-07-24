@@ -119,7 +119,7 @@ class main():
                 MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer, define_charge=self.charge).run()
         else:
             logging.info("use MD relax for sampling")
-            MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer).run()
+            MDsample(input_sdf=self.db_name, save_frame=self.N_gen_conformer,define_charge=self.charge).run()
 
         ## run align 
         cluster(inputSDF_fileName="SAVE.sdf", save_n=self.N_gen_conformer).run()
