@@ -190,7 +190,7 @@ class main():
 
         sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge).run_pyscf()
         logging.info("Get input pose single point energy")
-        stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="read").run_pyscf()
+        stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="define", define_charge=self.charge).run_pyscf()
         logging.info("Get theoretical stable pose single point energy")
 
         #input_energy = float(input_pose[0][0][0])
