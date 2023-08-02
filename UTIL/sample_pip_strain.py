@@ -68,7 +68,6 @@ class main():
                 self.charge = None
         
         #print(f"gen conformer: {self.N_gen_conformer}")
-        print(self.charge)
         
         self.HA_constrain = args["use_constrain"]
         self.if_csv = args["if_csv"]
