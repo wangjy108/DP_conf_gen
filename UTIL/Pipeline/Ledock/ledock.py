@@ -373,7 +373,14 @@ class main():
 
                 self.config_file(_path=_path, config_dic=config_dic)
                 self.json_config(_path=_path)
-                os.system(f"cp /opt/scripts/run_ledock.py {os.path.join(self.main_work_dir, _path)}")
+
+                original_cp_cmd = f"cp /opt/scripts/run_ledock.py {os.path.join(self.main_work_dir, _path)}"
+
+                (_, _) = subprocess.getstatusoutput(original_cp_cmd)
+
+                if not os.path.isfile(f"{os.path.join(self.main_work_dir, _path)}"):
+                    os.system(f"cp ./run_ledock.py {os.path.join(self.main_work_dir, _path)}")
+
                 os.system(f"cp {receptor} {os.path.join(self.main_work_dir, _path)}")
         else:
             if self.ligand_file_type:
@@ -391,7 +398,13 @@ class main():
 
                     self.config_file(_path=_path, config_dic=config_dic)
                     self.json_config(_path=_path)
-                    os.system(f"cp /opt/scripts/run_ledock.py {os.path.join(self.main_work_dir, _path)}")
+
+                    original_cp_cmd = f"cp /opt/scripts/run_ledock.py {os.path.join(self.main_work_dir, _path)}"
+
+                    (_, _) = subprocess.getstatusoutput(original_cp_cmd)
+
+                    if not os.path.isfile(f"{os.path.join(self.main_work_dir, _path)}"):
+                        os.system(f"cp ./run_ledock.py {os.path.join(self.main_work_dir, _path)}")
                     os.system(f"cp {receptor} {os.path.join(self.main_work_dir, _path)}")
             else:
                 logging.info("Assign at least one ligand related parameter in config.in, abort")
