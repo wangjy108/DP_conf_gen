@@ -296,7 +296,7 @@ class main():
                 shutil.rmtree(_path)
 
         
-        #logging.info("Finishe collect")
+        logging.info("Finish collect")
         
         return 
     
