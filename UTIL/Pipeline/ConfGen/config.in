@@ -1,0 +1,10 @@
+[lbg_config]
+lbg_project=10533
+lbg_machine_type=
+lbg_image_name=registry.dp.tech/dptech/prod-1364/strain:run0.0.6
+max_N=10000
+
+[general]
+input_smi_db=test.smi
+energy_window=5.0
+rmsd_cutoff=1.5
