@@ -1,0 +1,8 @@
+[lbg_config]
+lbg_project=16823
+lbg_machine_type=
+lbg_image=
+N_in_group=1
+
+[general]
+work_dir=/data/code_POC/strain/POC_simplifiedV/LigBoundConf_subset_seperate/2nd/issued/test/sdf
