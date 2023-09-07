@@ -135,7 +135,7 @@ class main():
             if not os.path.exists(_work_dir):
                 os.mkdir(_work_dir)
             os.chdir(_work_dir)
-            logging.info(f"At {i}th path")
+            logging.info(f"Working with subset {i}")
             get_set = _all[i*self.N_in_group:(i+1)*self.N_in_group]
 
             _flag = 0
