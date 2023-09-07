@@ -57,6 +57,14 @@ class main():
         except Exception as e:
             self.main_dir = None
         
+        try:
+            self.extra_charge = general["extra_charge"]
+        except Exception as e:
+            self.extra_charge = None
+        else:
+            if not os.path.isfile(self.extra_charge):
+                self.extra_charge = None
+        
         self.root_dir = os.getcwd()
         self.run_type = args.run_type
 
@@ -95,6 +103,17 @@ class main():
             cc.write("done\n")
             cc.write("\n")
         #logging.info("Prepared for local run, run by 'nohup bash run.sh &' to start running")
+        return
+    
+    def setup_local_special(self, work_dir, cmd_list):
+        file_name = os.path.join(work_dir, "run.sh")
+    
+        with open(file_name, "w+") as cc:
+            cc.write("#!/bin/sh \n")
+            cc.write("\n")
+            for each_line in cmd_list:
+                cc.write(each_line)
+            cc.write("\n")
         return
 
     def submit(self):
@@ -140,18 +159,40 @@ class main():
 
             _flag = 0
 
+            bash_cmd = []
+
             for each in get_set:
                 original_file = os.path.join(self.main_dir, each)
                 target_file = os.path.join(_work_dir, each)
                 cmd = f"mv {original_file} {target_file}"
                 (_, _) = subprocess.getstatusoutput(cmd)
+
+                if self.extra_charge:
+                    self.extra_charge = os.path.join(self.root_dir, self.extra_charge)
+                    df_charge = pd.read_csv(self.extra_charge)
+                    _dic = {}
+                    for idx, row in df_charge.iterrows():
+                        _dic.setdefault(row["LigLabel"], row["charge"])
+                    
+                    try:
+                        _dic[each.split(".")[0]]
+                    except Exception as e:
+                        bash_cmd.append(f"python sample_pip_strain.py --input_sdf {each} \n")
+                    else:
+                        get_charge = _dic[each.split(".")[0]]
+                        bash_cmd.append(f"python sample_pip_strain.py --input_sdf {each} --define_charge {get_charge}\n")
+
                 if os.path.isfile(target_file):
                     _flag += 1
             
             if _flag == len(get_set):
                 #setup_lbg(projectID=projectID, _path=_work_dir)
                 self.setup_lbg(work_dir=_work_dir)
-                self.setup_local(work_dir=_work_dir)
+
+                if bash_cmd:
+                    self.setup_local_special(work_dir=_work_dir, cmd_list=bash_cmd)
+                else:
+                    self.setup_local(work_dir=_work_dir)
                 cmd_cp = f"cp {cmd_py} ./"
                 (_, _) = subprocess.getstatusoutput(cmd_cp)
 
