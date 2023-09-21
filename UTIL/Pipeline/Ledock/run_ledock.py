@@ -327,8 +327,6 @@ class main():
                     
                     
                     os.system(f"rm -f {ligand_prefix}.dok")
-                    if not os.path.exists("DockingPose"):
-                        os.mkdir("DockingPose")
 
                     os.system(f"touch ./DockingPose/docked_{ligand_prefix}.pdb")
                     for each in saved:
@@ -342,7 +340,11 @@ class main():
 
     def run(self):
         termination_flag = self.get_docking_input()
+        
         if termination_flag:
+            if not os.path.exists("DockingPose"):
+                os.mkdir("DockingPose")
+                
             col = Parallel(n_jobs=termination_flag)(delayed(self.run_ledock)(i) for i in range(termination_flag))
         else:
             logging.info("Terminated")
