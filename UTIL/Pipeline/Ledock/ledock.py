@@ -48,7 +48,7 @@ class main():
 
         self.docking = config["docking"]
 
-        self.filter = config["filter"]
+        #self.filter = config["filter"]
 
         try:
             self.receptor_name = self.general["receptor_name"]
@@ -369,7 +369,7 @@ class main():
 
                 config_dic.setdefault("general", self.general)
                 config_dic.setdefault("docking", self.docking)
-                config_dic.setdefault("filter", self.filter)
+                #config_dic.setdefault("filter", self.filter)
 
                 self.config_file(_path=_path, config_dic=config_dic)
                 self.json_config(_path=_path)
@@ -394,7 +394,7 @@ class main():
 
                     config_dic.setdefault("general", self.general)
                     config_dic.setdefault("docking", self.docking)
-                    config_dic.setdefault("filter", self.filter)
+                    #config_dic.setdefault("filter", self.filter)
 
                     self.config_file(_path=_path, config_dic=config_dic)
                     self.json_config(_path=_path)

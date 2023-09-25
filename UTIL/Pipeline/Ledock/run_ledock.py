@@ -81,11 +81,11 @@ class main():
         except Exception as e:
             self.save_n_poses = 20
         
-        _filter = config["filter"]
-        try:
-            self.save_n = _filter.getint("save_n")
-        except Exception as e:
-            self.save_n = self.save_n_poses
+        #_filter = config["filter"]
+        #try:
+        #    self.save_n = _filter.getint("save_n")
+        #except Exception as e:
+        #    self.save_n = self.save_n_poses
 
     def transform_db(self, db_name):
         db_type = db_name.split("/")[-1].split(".")[-1]
@@ -105,6 +105,7 @@ class main():
                                         key=lambda x: int(x.split(".")[0].split("_")[-1]))
             
             n_thread = cpu_count()
+            #n_thread = 16
 
             run_ligand_list = []
             
@@ -288,58 +289,72 @@ class main():
             except Exception as e:
                 issued.append(ligand_prefix)
             else:
-                cmd_split = f"ledock -spli {get_docked_result[0]}"
-                (_, _) = subprocess.getstatusoutput(cmd_split)
-                try:
-                    get_all_pose = [cc for cc in os.listdir("./") if f"{ligand_prefix}_dock" in cc \
-                                                                    and cc.endswith(".pdb") \
-                                                                    and os.path.getsize(cc)]
-                except Exception as e:
-                    issued.append(ligand_prefix)
-                else:
-                    sorted_all_pose = sorted(get_all_pose, key=lambda x: int(x.split(".")[0].split("_")[-1].strip("dock")))
-                    _dic = {}
-                    saved = list(sorted_all_pose)[:self.save_n]
-                    #saved_in_sdf = []
-                    for idx, each in enumerate(saved):
-                        with open(each,"r+") as ff:
-                            content = [line.strip() for line in ff.readlines() if line]
+                if get_docked_result:
+                    cmd_split = f"ledock -spli {get_docked_result[0]}"
+                    (_, _) = subprocess.getstatusoutput(cmd_split)
+                    try:
+                        get_all_pose = [cc for cc in os.listdir("./") if f"{ligand_prefix}_dock" in cc \
+                                                                        and cc.endswith(".pdb") \
+                                                                        and os.path.getsize(cc)]
+                    except Exception as e:
+                        issued.append(ligand_prefix)
+                    else:
+                        #sorted_all_pose = sorted(get_all_pose, key=lambda x: int(x.split(".")[0].split("_")[-1].strip("dock")))
+                        _dic = {}
+                        #saved = list(sorted_all_pose)[:self.save_n]
+                        saved = get_all_pose
+                        #saved_in_sdf = []
+                        for idx, each in enumerate(saved):
+                            with open(each,"r+") as ff:
+                                content = [line.strip() for line in ff.readlines() if line]
+                            
+                            energy_line_idx = [idx for idx in range(len(content)) if content[idx].startswith("ATOM")][0] - 1
+
+                            get_energy = float(content[energy_line_idx].split()[-2])
+
+                            new_line = f"{each.split('.')[0]} Score: {get_energy}"
+
+                            content[energy_line_idx] = new_line
+
+                            #trans_cmd = f"obabel -ipdb {each} -O {each.split('.')[0]}.sdf"
+                            #(_,_) = subprocess.getstatusoutput(trans_cmd)
+
+                            _dic.setdefault(f"{each.split('.')[0]}", [str(get_energy), content])
+
+                            #if os.path.isfile(f"{each.split('.')[0]}.sdf") and os.path.getsize(f"{each.split('.')[0]}.sdf"):
+                            #    try:
+                            #        mol = [cc for cc in Chem.SDMolSupplier(f"{each.split('.')[0]}.sdf", removeHs=False) if cc]
+                            #    except Exception as e:
+                            #        mol = None
+                            #    if mol:
+                            #        this = mol[0]
+                            #        this.SetProp("_Name", f"{each.split('.')[0]}")
+                            #        this.SetProp("DockingScore", str(get_energy))
+                            #        saved_in_sdf.append(this)
                         
-                        energy_line_idx = [idx for idx in range(len(content)) if content[idx].startswith("ATOM")][0] - 1
+                        
+                        os.system(f"rm -f {ligand_prefix}.dok")
 
-                        get_energy = float(content[energy_line_idx].split()[-2])
+                        with open(f"./DockingPose/docked_{ligand_prefix}.pdb", "w+") as c:
+                            for kk, vv in _dic.items():
+                                for line in vv[-1]:
+                                    c.write(f"{line}\n")
+                                
+                                dic_energy.update({kk: vv[0]})
 
-                        #trans_cmd = f"obabel -ipdb {each} -O {each.split('.')[0]}.sdf"
-                        #(_,_) = subprocess.getstatusoutput(trans_cmd)
-
-                        _dic.setdefault(f"{each.split('.')[0]}", str(get_energy))
-
-                        #if os.path.isfile(f"{each.split('.')[0]}.sdf") and os.path.getsize(f"{each.split('.')[0]}.sdf"):
-                        #    try:
-                        #        mol = [cc for cc in Chem.SDMolSupplier(f"{each.split('.')[0]}.sdf", removeHs=False) if cc]
-                        #    except Exception as e:
-                        #        mol = None
-                        #    if mol:
-                        #        this = mol[0]
-                        #        this.SetProp("_Name", f"{each.split('.')[0]}")
-                        #        this.SetProp("DockingScore", str(get_energy))
-                        #        saved_in_sdf.append(this)
-                    
-                    
-                    os.system(f"rm -f {ligand_prefix}.dok")
-
-                    os.system(f"touch ./DockingPose/docked_{ligand_prefix}.pdb")
-                    for each in saved:
-                        os.system(f"cat {each} >> ./DockingPose/docked_{ligand_prefix}.pdb")
-                    
-                    os.system(f"rm -f {ligand_prefix}_dock*.pdb")
-                    
-                    dic_energy.update(_dic)
+                        #os.system(f"touch ./DockingPose/docked_{ligand_prefix}.pdb")
+                        #for each in saved:
+                        #    os.system(f"cat {each} >> ./DockingPose/docked_{ligand_prefix}.pdb")
+                        
+                        os.system(f"rm -f {ligand_prefix}_dock*.pdb")
+                        
+                        #dic_energy.update(_dic)
 
         return dic_energy, issued
 
     def run(self):
         termination_flag = self.get_docking_input()
+        #termination_flag = 16
         
         if termination_flag:
             if not os.path.exists("DockingPose"):
