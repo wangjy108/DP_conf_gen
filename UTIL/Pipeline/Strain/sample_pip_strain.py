@@ -136,9 +136,9 @@ class main():
         ## run final SP
         logging.info("Start Single point energy calc")
 
-        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge, basis='6-31+G*').run_pyscf()
+        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge, basis='6-311G*').run_pyscf()
         logging.info("Get input pose single point energy")
-        stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="define", define_charge=self.charge, basis='6-31+G*').run_pyscf()
+        stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="define", define_charge=self.charge, basis='6-311G*').run_pyscf()
         logging.info("Get theoretical stable pose single point energy")
 
         #input_energy = float(input_pose[0][0][0])
@@ -193,9 +193,9 @@ class main():
         ## run final SP
         logging.info("Start Single point energy calc")
 
-        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge, basis='6-31+G*').run_pyscf()
+        sorted_input_pose, input_mol = syssp(input_sdf=self.db_name, charge_method="define", define_charge=self.charge, basis='6-311G*').run_pyscf()
         logging.info("Get input pose single point energy")
-        stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="define", define_charge=self.charge, basis='6-31+G*').run_pyscf()
+        stable_pose, stable_mol = syssp(input_sdf="_OPT.sdf", charge_method="define", define_charge=self.charge, basis='6-311G*').run_pyscf()
         logging.info("Get theoretical stable pose single point energy")
 
         #input_energy = float(input_pose[0][0][0])
