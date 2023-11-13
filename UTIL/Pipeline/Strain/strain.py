@@ -38,9 +38,9 @@ class main():
         try:
             self.lbg_image=lbg_config["lbg_image"]
         except Exception as e:
-            self.lbg_image = 'registry.dp.tech/dptech/prod-1364/strain:run0.0.6'
+            self.lbg_image = 'registry.dp.tech/dptech/prod-1364/strain:run0.0.8'
         if not self.lbg_image:
-            self.lbg_image = 'registry.dp.tech/dptech/prod-1364/strain:run0.0.6'
+            self.lbg_image = 'registry.dp.tech/dptech/prod-1364/strain:run0.0.8'
 
         try:
             self.N_in_group = lbg_config.getint("N_in_group")
