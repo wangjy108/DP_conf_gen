@@ -76,6 +76,7 @@ class main():
         return get_initial
     
     def sample(self, input_sdf):
+
         ## initial
         _dic_rotableBond = {0: 100, 1: 300}
         try:
@@ -91,13 +92,17 @@ class main():
             rotable_bond_index = _def_func(rotable_bond)
 
         ## perform initial optimization to relax MM bad contact
-        _, read_charge = sysopt(input_sdf=input_sdf, 
-                                HA_constrain=True).run_process()
-        charge = read_charge[0]
-
-        if os.path.isfile("_OPT.sdf"):
+        try:
+            _, read_charge = sysopt(input_sdf=input_sdf, 
+                                    HA_constrain=True).run_process()
+        except Exception as e:
+            logging.info("Failed at initial optimization after conformer generation, abort")
+            return None
+        
+        if os.path.isfile("_OPT.sdf") and os.path.getsize("_OPT.sdf"):
             optimized_input_sdf = f"{self.input_mol_label}.initial_opt.sdf"
             os.system(f"mv _OPT.sdf {optimized_input_sdf}")
+            charge = read_charge[0]
         else:
             logging.info("Failed at initial optimization after conformer generation, abort")
             return None
