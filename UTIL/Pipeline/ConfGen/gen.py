@@ -60,7 +60,7 @@ class main():
         gen_cmd = f'obabel -:{self.input_smi} -O _INITIAL_{self.input_mol_label}.sdf --gen3D'
         #(_, _) = subprocess.getstatusoutput(gen_cmd)
         try:
-            p = subprocess.run(gen_cmd.split(), timeout=10, check=True, stdout=subprocess.PIPE)
+            p = subprocess.run(gen_cmd.split(), timeout=20, check=True, stdout=subprocess.PIPE)
         except subprocess.TimeoutExpired:
             logging.info("Timeout with obabel gen")
         
