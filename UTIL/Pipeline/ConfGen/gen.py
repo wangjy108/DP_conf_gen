@@ -57,8 +57,13 @@ class main():
             return None             
     
     def gen_initial_conformer_by_obabel(self):
-        gen_cmd = f'obabel -:"{self.input_smi}" -O _INITIAL_{self.input_mol_label}.sdf --gen3D'
-        (_, _) = subprocess.getstatusoutput(gen_cmd)
+        gen_cmd = f'obabel -:{self.input_smi} -O _INITIAL_{self.input_mol_label}.sdf --gen3D'
+        #(_, _) = subprocess.getstatusoutput(gen_cmd)
+        try:
+            p = subprocess.run(gen_cmd.split(), timeout=10, check=True, stdout=subprocess.PIPE)
+        except subprocess.TimeoutExpired:
+            logging.info("Timeout with obabel gen")
+        
         if os.path.isfile(f"_INITIAL_{self.input_mol_label}.sdf") \
             and os.path.getsize(f"_INITIAL_{self.input_mol_label}.sdf"):
             return f"_INITIAL_{self.input_mol_label}.sdf"
