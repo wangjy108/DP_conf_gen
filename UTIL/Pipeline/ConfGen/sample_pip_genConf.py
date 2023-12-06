@@ -138,9 +138,9 @@ class main():
             
             self.json_config(_path=_path, cmd=each_cmd)
 
-            cmd_file = os.path.join("/opt/scripts", "gen.py")
-            if not os.path.isfile(cmd_file):
-                cmd_file = os.path.join(self.main_dir, "gen.py")
+            #cmd_file = os.path.join("/opt/scripts", "gen.py")
+            #if not os.path.isfile(cmd_file):
+            cmd_file = os.path.join(self.main_dir, "gen.py")
             
             if not os.path.isfile(cmd_file):
                 logging.info("No available command file, abort")
