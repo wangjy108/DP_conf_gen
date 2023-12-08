@@ -82,7 +82,7 @@ class main():
             group = math.ceil(len(ligand_list) / self.max_N)
 
             for i in range(group):
-                content_in_this_group = ligand_list[i*group:(i+1)*group]
+                content_in_this_group = ligand_list[i*self.max_N:(i+1)*self.max_N]
 
                 if not os.path.exists(f"{i}"):
                     os.mkdir(f"{i}")
