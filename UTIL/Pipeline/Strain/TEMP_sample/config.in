@@ -1,7 +1,7 @@
 [lbg_config]
 lbg_project=
 lbg_machine_type=
-lbg_image_name=
+lbg_image_name=registry.dp.tech/dptech/prod-1364/strain:run0.0.9
 max_N=
 
 [general]
