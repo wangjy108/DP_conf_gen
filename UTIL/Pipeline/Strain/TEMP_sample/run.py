@@ -139,7 +139,7 @@ class main():
             if os.path.isdir(str(row['JOB_ID'])):
                 (_, _) = subprocess.getstatusoutput(f"mv {row['JOB_ID']}/* ./")
                 (_, _) = subprocess.getstatusoutput(f"rm -rf {row['JOB_ID']}")
-                (_, _) = subprocess.getstatusoutput("rm -f ST* TRACK* input.json *.sh *.py")
+                (_, _) = subprocess.getstatusoutput("rm -f ST* TRACK* input.json *.sh *.py *.sdf")
                 (_, _) = subprocess.getstatusoutput(f"mv * {self.work_dir}")
 
                 os.chdir(self.main_dir)
