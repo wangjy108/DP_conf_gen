@@ -1,0 +1,11 @@
+[lbg_config]
+lbg_project=
+lbg_machine_type=
+lbg_image_name=
+max_N=
+
+[general]
+work_dir=
+rmsd_cutoff=
+
+
