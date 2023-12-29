@@ -14,10 +14,20 @@ logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO)
 
 class main():
     def __init__(self, **args):
-        self.work_dir = args["DockingPose_path"]
-        self.input_db = args["input_db_sdf"]
+        parser = argparse.ArgumentParser(description="ledock pdb2sdf, only works with lbg submited type")
 
-        self.main_dir = os.getcwd()
+        parser.add_argument("--config", help="path of config file", default=False)
+        args = parser.parse_args()
+
+        config = configparser.ConfigParser()
+        config.read(args.config)
+
+        general = config["general"]
+
+        self.main_dir = general["work_dir"]
+        
+        self.work_dir = os.path.join(self.main_dir, "DockingPose")
+        self.input_db = os.path.join(self.main_dir, general["ligand_db_name"])
 
         #os.chdir(self.work_dir)
 
@@ -216,7 +226,8 @@ class main():
 
         return 
 
-
+if __name__ == "__main__":
+    main()
 
 
 
