@@ -3,6 +3,8 @@ import logging
 import subprocess
 import pandas as pd
 from rdkit import Chem
+from pathlib import Path
+import argparse
 
 os.environ["PYTHONPATH"] = "/opt/scripts"
 
@@ -152,3 +154,9 @@ class confGen_topo():
             _, _ = subprocess.getstatusoutput(rm_cmd)
 
         return saved_sdf, saved_error
+
+
+
+
+
+
