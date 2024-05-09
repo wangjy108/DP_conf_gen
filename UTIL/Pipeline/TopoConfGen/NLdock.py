@@ -172,7 +172,7 @@ class main():
             logging.info("Nothing to collect, abort")
             return 
 
-        df = pd.read_csv(csv, header=0)
+        df = pd.read_csv("submission_track_list", header=0)
         sdf_contents = []
         error_message = []
 
@@ -205,7 +205,7 @@ class main():
             os.chdir(self.work_dir)
         
         for _path in list(df["local_path"]):
-            if _path not in should_not_delet:
+            if _path not in should_not_delete:
                 shutil.rmtree(_path)
         
         logging.info("Finish collect")
